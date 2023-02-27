@@ -1,0 +1,26 @@
+<script src="https://cdn.jsdelivr.net/npm/@metamask/onboarding@1.0.1/dist/metamask-onboarding.bundle.js"></script>
+  <script src="js/countdown.js"></script>
+  <script src="js/app.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/merkletreejs@latest/merkletree.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/keccak256@latest/keccak256.js"></script>
+
+
+    const contractAD ='0xb22D38fDd6296FEBe05B1e0233396F5F60008167';
+    const wallets = ["0X5B38DA6A701C568545DCFCB03FCB875F56BEDDC4","0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2","0XDCAB482177A592E424D1C8318A464FC922E8DE40","0X6E21D37E07A6F7E53C7ACE372CEC63D4AE4B6BD0","0X09BAAB19FC77C19898140DADD30C4685C597620B","0XCC4C29997177253376528C05D3DF91CF2D69061A","0xdD870fA1b7C4700F2BD7f44238821C26f7392148"];
+    const wallet = event.queryStringParameters && event.queryStringParameters.wallet
+
+    const leaves = wallets.map(x => keccak256(x))
+    const tree = new MerkleTree(leaves, keccak256, { sortPairs: true })
+    const buf2hex = x => '0x' + x.toString('hex')
+  
+    console.log(buf2hex(tree.getRoot()))
+  
+
+    const leaf = keccak256(wallet) // wallet using walletconnect/metamask
+    const proof = tree.getProof(leaf).map(x => buf2hex(x.data))
+
+
+    const contract = new ethers.Contract(contractAD, abi, signer );
+    // const fee =  await contract.mintPrice();
+    contract.methods.goListMint(1,proof).send({from: wallet });                    
+    var data= contract.methods.goListMint(1, proof).send({ from: wallet }) // will be called on click of the mint button
